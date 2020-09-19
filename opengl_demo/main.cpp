@@ -10,6 +10,13 @@ void processInput(GLFWwindow *window);
 const unsigned int SCR_WIDTH = 300;
 const unsigned int SCR_HEIGHT = 300;
 
+const char *vertexShaderSource =
+"#version 330 core" // 版本声明
+"layout (location = 0) in vec3 aPos" // in 声明所有顶点属性
+"void main(){"
+"gl_Postion = vec4(aPos.x, aPos.y, aPos.z, 1.0)"
+"}";
+
 int main(int argc, char * argv[]) {
     // 初始化 GLFW
     glfwInit();
@@ -31,7 +38,7 @@ int main(int argc, char * argv[]) {
     
     // 初始化 GLAD
     if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)){ // GLAD管理opengl指针
-        std::cout<< "Faild to initialized GLAD." << std::endl;
+        std::cout << "Faild to initialized GLAD." << std::endl;
         return -1;
     }
     
@@ -40,6 +47,18 @@ int main(int argc, char * argv[]) {
     // 当窗口大小改变时，通知 opengl 更新视图
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     
+    float vertices[] = {
+        -0.5f, -0.5f, 0.0f,
+         0.5f, -0.5f, 0.0f,
+         0.0f,  0.5f, 0.0f
+    };
+    
+    unsigned int VBO;
+    glGenBuffers(1, &VBO);
+    
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
     
     // 循环渲染 避免渲染一次窗口就关闭
     while(!glfwWindowShouldClose(window)){
@@ -47,12 +66,10 @@ int main(int argc, char * argv[]) {
         processInput(window);
         
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f); // 状态设置
-        glClear(glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT););// 状态应用 通过调用glClear函数来清空屏幕的颜色缓冲，它接受一个缓冲位(BufferBit)来指定要清空的缓冲，可能的缓冲位有GL_COLOR_BUFFER_BIT，GL_DEPTH_BUFFER_BIT和GL_STENCIL_BUFFER_BIT。
+        glClear(GL_COLOR_BUFFER_BIT); // 状态应用 通过调用glClear函数来清空屏幕的颜色缓冲，它接受一个缓冲位(BufferBit)来指定要清空的缓冲，可能的缓冲位有GL_COLOR_BUFFER_BIT，GL_DEPTH_BUFFER_BIT和GL_STENCIL_BUFFER_BIT。
         
         // TODO: 在这里输入渲染代码
 
-        
         
         // 检查调用事件、交换缓冲
         glfwPollEvents(); // 检查是否有事件触发，并调用 callback
