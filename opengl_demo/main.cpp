@@ -1,6 +1,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <math.h>
 
 const unsigned int SCR_WIDTH = 1000;
 const unsigned int SCR_HEIGHT = 650;
@@ -11,8 +12,9 @@ const char *vertexShaderSource = "#version 330 core\n"
 "}\n\0";
 const char *fragmentShaderSource = "#version 330 core\n"
 "out vec4 fragColor;\n"
+"uniform vec4 ourColor;"
 "void main(){\n"
-"   fragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+"   fragColor = ourColor;\n"
 "}\n\0";
 
 void processInput(GLFWwindow* window);
@@ -111,9 +113,19 @@ int main(){
     while(!glfwWindowShouldClose(window)){
         processInput(window);
         
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         glUseProgram(shaderProgram);
+        
+//        float timeValue = glfwGetTime();
+//        float greenValue = sin(timeValue) / 2.0f + 0.5f;
+//        int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
+//        glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
+        float timeValue = glfwGetTime();
+        float greenValue = sin(timeValue) / 2.0f + 0.5f;
+        int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
+        glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f); // 在当前使用的着色器中 设置 Uniform，故必须在 glUseProgram 之后调用
+        
         // 画第一个三角形
         glBindVertexArray(VAOs[0]);
         glDrawArrays(GL_TRIANGLES, 0, 3);
