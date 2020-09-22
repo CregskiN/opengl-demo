@@ -27,6 +27,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		6C3DC8912519898100DC702E /* shader_s.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = shader_s.h; sourceTree = "<group>"; };
 		6CBA4B1D25111C6E0004DA88 /* opengl_demo */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = opengl_demo; sourceTree = BUILT_PRODUCTS_DIR; };
 		6CBA4B2025111C6E0004DA88 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		6CBA4B2825111ED30004DA88 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
@@ -71,6 +72,7 @@
 			children = (
 				6CBA4B2E25111F940004DA88 /* glad.c */,
 				6CBA4B2025111C6E0004DA88 /* main.cpp */,
+				6C3DC8912519898100DC702E /* shader_s.h */,
 			);
 			path = opengl_demo;
 			sourceTree = "<group>";

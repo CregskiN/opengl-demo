@@ -3,8 +3,6 @@
 #include <iostream>
 #include <math.h>
 
-#include </Users/cregskin/code/c/opengl_demo/opengl_demo/shader_s.h> // 强制使用绝对路径
-
 const unsigned int SCR_WIDTH = 1000;
 const unsigned int SCR_HEIGHT = 650;
 const char *vertexShaderSource = "#version 330 core\n"
