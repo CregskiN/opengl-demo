@@ -3,22 +3,10 @@
 #include <iostream>
 #include <math.h>
 
+#include </Users/cregskin/code/c/opengl_demo/opengl_demo/shader_s.h> // 强制使用绝对路径
+
 const unsigned int SCR_WIDTH = 1000;
 const unsigned int SCR_HEIGHT = 650;
-const char *vertexShaderSource = "#version 330 core\n"
-"layout (location = 0) in vec3 aPods;\n" // 位置变量位置值 0
-"layout (location = 1) in vec3 aColor;\n" // 颜色变量位置值 1
-"out vec3 ourColor;" // 向FragmentShader输出一个颜色
-"void main(){\n"
-"   gl_Position = vec4(aPods.x, aPods.y, aPods.z, 1.0);\n"
-"   ourColor = aColor;"
-"}\n\0";
-const char *fragmentShaderSource = "#version 330 core\n"
-"in vec3 ourColor;"
-"out vec4 fragColor;\n"
-"void main(){\n"
-"   fragColor = vec4(ourColor, 1.0f);\n"
-"}\n\0";
 
 void processInput(GLFWwindow* window);
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
@@ -48,38 +36,7 @@ int main(){
         return -1;
     }
     
-    int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-    glCompileShader(vertexShader);
-    int success;
-    char infoLog[512];
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-    if(!success){
-        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-        std::cout << "Error: Vertex Shader Compiled failed." << infoLog << std::endl;
-    }
-    
-    int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-    glCompileShader(fragmentShader);
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-    if(!success){
-        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-        std:: cout << "Error: Fragment Shader Compiled failed." << infoLog << std::endl;
-    }
-    
-    int shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-    if(!success){
-        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-        std:: cout << "Error: Shader Program linked failed." << infoLog << std::endl;
-    }
-    
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
+    Shader ourShader("/Users/cregskin/code/c/opengl_demo/opengl_demo/shader.vs", "/Users/cregskin/code/c/opengl_demo/opengl_demo/shader.fs");
     
     
     float vertices[] = {
@@ -103,7 +60,7 @@ int main(){
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
     
-    glUseProgram(shaderProgram);
+    
     
     while(!glfwWindowShouldClose(window)){
         processInput(window);
@@ -111,6 +68,7 @@ int main(){
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
+        ourShader.use();
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 3);
         
@@ -120,7 +78,6 @@ int main(){
     
     glDeleteVertexArrays(2, &VAO);
     glDeleteBuffers(2, &VBO);
-    glDeleteProgram(shaderProgram);
     glfwTerminate();
     return 0;
 }
