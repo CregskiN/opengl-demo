@@ -42,8 +42,10 @@ int main(){
         // 位置              // 颜色
         0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,   // 右下
         -0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,   // 左下
-        0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f    // 顶部
+//        0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f    // 顶部
     };
+    
+    
     
     unsigned int VBO, VAO;
     glGenVertexArrays(1, &VAO);
@@ -69,7 +71,7 @@ int main(){
 
         ourShader.use();
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawArrays(GL_LINE_STRIP, 0, 2); // 数据起始位置 点数
         
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -90,4 +92,3 @@ void processInput(GLFWwindow *window){
         glfwSetWindowShouldClose(window, true);
     }
 }
-
