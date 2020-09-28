@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6C7F869F2520E33700960FCB /* lib.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6C7F869D2520E33700960FCB /* lib.cpp */; };
 		6CBA4B2125111C6E0004DA88 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6CBA4B2025111C6E0004DA88 /* main.cpp */; };
 		6CBA4B2925111ED30004DA88 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6CBA4B2825111ED30004DA88 /* OpenGL.framework */; };
 		6CBA4B2B25111F220004DA88 /* libglfw.3.3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 6CBA4B2A25111F220004DA88 /* libglfw.3.3.dylib */; };
@@ -28,6 +29,7 @@
 
 /* Begin PBXFileReference section */
 		6C3DC8912519898100DC702E /* shader_s.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = shader_s.h; sourceTree = "<group>"; };
+		6C7F869D2520E33700960FCB /* lib.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = lib.cpp; sourceTree = "<group>"; };
 		6C9C62E1251C8CF7006F1581 /* shader.vs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = shader.vs; sourceTree = "<group>"; };
 		6C9C62E2251C8D0E006F1581 /* shader.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = shader.fs; sourceTree = "<group>"; };
 		6CBA4B1D25111C6E0004DA88 /* opengl_demo */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = opengl_demo; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -52,15 +54,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		6C9C62E0251C8CB1006F1581 /* shader */ = {
-			isa = PBXGroup;
-			children = (
-				6C9C62E1251C8CF7006F1581 /* shader.vs */,
-				6C9C62E2251C8D0E006F1581 /* shader.fs */,
-			);
-			name = shader;
-			sourceTree = "<group>";
-		};
 		6CBA4B1425111C6E0004DA88 = {
 			isa = PBXGroup;
 			children = (
@@ -81,10 +74,12 @@
 		6CBA4B1F25111C6E0004DA88 /* opengl_demo */ = {
 			isa = PBXGroup;
 			children = (
-				6C9C62E0251C8CB1006F1581 /* shader */,
+				6C9C62E2251C8D0E006F1581 /* shader.fs */,
+				6C9C62E1251C8CF7006F1581 /* shader.vs */,
 				6CBA4B2E25111F940004DA88 /* glad.c */,
 				6CBA4B2025111C6E0004DA88 /* main.cpp */,
 				6C3DC8912519898100DC702E /* shader_s.h */,
+				6C7F869D2520E33700960FCB /* lib.cpp */,
 			);
 			path = opengl_demo;
 			sourceTree = "<group>";
@@ -156,6 +151,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6C7F869F2520E33700960FCB /* lib.cpp in Sources */,
 				6CBA4B2125111C6E0004DA88 /* main.cpp in Sources */,
 				6CBA4B2F25111F940004DA88 /* glad.c in Sources */,
 			);
@@ -278,6 +274,11 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				HEADER_SEARCH_PATHS = (
+					"${glew_header}",
+					"${glfw_header}",
+					/usr/local/include,
+				);
+				"HEADER_SEARCH_PATHS[arch=*]" = (
 					"${glew_header}",
 					"${glfw_header}",
 					/usr/local/include,
