@@ -79,9 +79,9 @@ int main(){
     glEnableVertexAttribArray(2);
     
     
-    unsigned int texture1, texture2;
-    glGenTextures(1, &texture1); // 定义纹理数据空间
-    glBindTexture(GL_TEXTURE_2D, texture1); // 绑定纹理空间
+    unsigned int texture;
+    glGenTextures(1, &texture); // 定义纹理数据空间
+    glBindTexture(GL_TEXTURE_2D, texture); // 绑定纹理空间
     // 配置 2D 纹理对象
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // 配置 S 轴纹理环绕方式
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); // 配置 T 轴纹理环绕方式
@@ -89,37 +89,17 @@ int main(){
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // 纹理放大，使用 linear 过滤纹理
     
     int width, height, nrChannels;
-    stbi_set_flip_vertically_on_load(true);
     std::string inputPath = "/Users/cregskin/code/c/opengl_demo/opengl_demo/container.jpg";
-    unsigned char* data = stbi_load(inputPath.c_str(), &width, &height, &nrChannels, 0); // 文件路径 宽度 高度 信道数量
+    unsigned char* data = stbi_load(inputPath.c_str(),&width,&height,&nrChannels, 0); // filename width height numberOfChannels
     if(data){
         // 纹理目标(处于opengl) 多级渐远纹理级别0为基本级别 纹理储存的格式 固定0历史遗留问题 原图格式和数据类型 原数据
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
     }else {
-        std::cout << "Error: Faile to load image 1." << std::endl;
+        std::cout << "Error: Faile to load image." << std::endl;
     }
     stbi_image_free(data); // 释放 data 数据
     
-    glGenTextures(1, &texture2);
-    glBindTexture(GL_TEXTURE_2D, texture2);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    inputPath = "/Users/cregskin/code/c/opengl_demo/opengl_demo/awesomeface.png";
-    data = stbi_load(inputPath.c_str(), &width, &height, &nrChannels, 0);
-    if(data){
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }else {
-        std::cout << "Error: Faile to load image 2" << std::endl;
-    }
-    stbi_image_free(data);
-    
-    ourShader.use();
-    glUniform1i(glGetUniformLocation(ourShader.ID, "texture1"), 0); // 手动设置 uniform
-    ourShader.setInt("texture2", 1); // 使用自己封装的 API
     
     while(!glfwWindowShouldClose(window)){
         processInput(window);
@@ -127,10 +107,7 @@ int main(){
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture1);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, texture2);
+        glBindTexture(GL_TEXTURE_2D, texture);
         
         ourShader.use();
         glBindVertexArray(VAO);
@@ -140,11 +117,8 @@ int main(){
         glfwPollEvents();
     }
     
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
-    glDeleteTextures(1, &texture1);
-    glDeleteTextures(1, &texture2);
+    glDeleteVertexArrays(2, &VAO);
+    glDeleteBuffers(2, &VBO);
     glfwTerminate();
     return 0;
 }
