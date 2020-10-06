@@ -161,21 +161,27 @@ int main(){
 //        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans)); // 位置值 矩阵数量 是否置换矩阵 将GLM生成的矩阵转为OPENGL希望的类型ˆ
         
         unsigned int transformLoc = glGetUniformLocation(ourShader.ID, "transform");
-        // 第一个 container
+        // 右下角的 container // 先旋转 后位移
         glm::mat4 trans = glm::mat4(1.0f);
         trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
-        trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+        trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(1.0f, 0.0f, 0.0f));
         glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         
-        // 第二个 container
-        trans = glm::mat4(1.0f); // 初始化单位向量
-        trans = glm::translate(trans, glm::vec3(-0.5f, 0.5f, 0.0f));
-        float scaleAmount = sin(glfwGetTime());
-        trans = glm::scale(trans, glm::vec3(scaleAmount, scaleAmount, scaleAmount));
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, &trans[0][0]);
+        // 左上角的 container // 先缩放 后位移
+        trans = glm::mat4(1.0f); // 初始化4*4单位矩阵
+        trans = glm::translate(trans, glm::vec3(-0.5f, 0.5f, 0.0f)); // 合成位移矩阵
+        float scaleAmount = sin(glfwGetTime()); // 缩放倍数 为负时翻转
+        trans = glm::scale(trans, glm::vec3(scaleAmount, scaleAmount, scaleAmount)); // 合成缩放矩阵
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, &trans[0][0]); // 将矩阵传给 Uniform
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); // 绘制模式 绘制顶点个数 索引类型 EBO中的偏移量
+        
+        trans = glm::mat4(1.0f); // 初始化单位矩阵
+        trans = glm::translate(trans, glm::vec3(0.5f, 0.5f, 0.0f));
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, &trans[0][0]);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        
         
         glfwSwapBuffers(window);
         glfwPollEvents();
