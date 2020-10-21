@@ -11,7 +11,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include </Users/cregskin/code/c/opengl_demo/opengl_demo/shader_s.h> // 强制使用绝对路径
+#include "shader_s.h" // 强制使用绝对路径
 
 const unsigned int SCR_WIDTH = 1000;
 const unsigned int SCR_HEIGHT = 650;
@@ -158,10 +158,10 @@ int main(){
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    inputPath = "/Users/cregskin/code/c/opengl_demo/opengl_demo/awesomeface.jpg";
+    inputPath = "/Users/cregskin/code/c/opengl_demo/opengl_demo/awesomeface.png";
     data = stbi_load(inputPath.c_str(), &width, &height, &nrChannels, 0);
     if(data){
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
     }else {
         std::cout << "Error: Faile to load image 2" << std::endl;
@@ -189,22 +189,30 @@ int main(){
         
         ourShader.use();
         
+        // 定义圆轨半径
+        float radius = 10.0f;
+        // 摄像机位置x坐标
+        float cameraX = sin(glfwGetTime()) * radius;
+        // 摄像机位置y坐标
+        float cameraZ = cos(glfwGetTime()) * radius;
+        
         // 定义三种变换矩阵：模型矩阵modelMatrix，观察矩阵viewMatrix，投影矩阵projectionMatrix
-        glm::mat4 view = glm::mat4(1.0f);;
-        glm::mat4 projection = glm::mat4(1.0f);;
-
+        glm::mat4 view;
+        glm::mat4 projection;
+        
         projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f)); // 单位矩阵 + 位移向量 = 位移矩阵
+//        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f)); // 单位矩阵 + 位移向量 = 位移矩阵
+        view = glm::lookAt(glm::vec3(cameraX, 0.0, cameraZ), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+        
         ourShader.setMat4("projection", projection);
         ourShader.setMat4("view", view);
         
         glBindVertexArray(VAO);
-        for(unsigned int i = 0; i < 10; i++)
-        {
+        for(unsigned int i = 0; i < 10; i++) {
           glm::mat4 model;
           model = glm::translate(model, cubePositions[i]);
 //          float angle = 20.0f * i;
-          model = glm::rotate(model, (float)glfwGetTime()*((i+1) % 3), glm::vec3(1.0f, 0.3f, 0.5f));
+          model = glm::rotate(model, (float)glfwGetTime()*(i+1), glm::vec3(1.0f, 0.3f, 0.5f));
           ourShader.setMat4("model", model);
 
           glDrawArrays(GL_TRIANGLES, 0, 36);
