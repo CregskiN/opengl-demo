@@ -7,6 +7,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
+//#define GLM_COORDINATE_SYSTEM == GLM_LEFT_HANDED
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -20,6 +21,9 @@ void processInput(GLFWwindow* window);
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void toNDC(float* vertices, int length, int SCR_WIDTH, int SCR_HEIGHT);
 
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f); // 摄像机位置向量
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f); // 摄像机方向，摄像机正z轴
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f); // 世界空间中上轴正方向
 
 int main(){
     // GLFW window
@@ -173,7 +177,7 @@ int main(){
     ourShader.setInt("texture1", 0);
     ourShader.setInt("texture2", 1);
     
-    
+
     
     // 循环渲染
     while(!glfwWindowShouldClose(window)){
@@ -190,32 +194,33 @@ int main(){
         ourShader.use();
         
         // 定义圆轨半径
-        float radius = 10.0f;
+        //        float radius = 10.0f;
         // 摄像机位置x坐标
-        float cameraX = sin(glfwGetTime()) * radius;
+        //        float cameraX = sin(glfwGetTime()) * radius;
         // 摄像机位置y坐标
-        float cameraZ = cos(glfwGetTime()) * radius;
+        //        float cameraZ = cos(glfwGetTime()) * radius;
+        
+
         
         // 定义三种变换矩阵：模型矩阵modelMatrix，观察矩阵viewMatrix，投影矩阵projectionMatrix
         glm::mat4 view;
         glm::mat4 projection;
         
         projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-//        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f)); // 单位矩阵 + 位移向量 = 位移矩阵
-        view = glm::lookAt(glm::vec3(cameraX, 0.0, cameraZ), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+        //        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f)); // 单位矩阵 + 位移向量 = 位移矩阵
+        view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
         
         ourShader.setMat4("projection", projection);
         ourShader.setMat4("view", view);
         
         glBindVertexArray(VAO);
         for(unsigned int i = 0; i < 10; i++) {
-          glm::mat4 model;
-          model = glm::translate(model, cubePositions[i]);
-//          float angle = 20.0f * i;
-          model = glm::rotate(model, (float)glfwGetTime()*(i+1), glm::vec3(1.0f, 0.3f, 0.5f));
-          ourShader.setMat4("model", model);
-
-          glDrawArrays(GL_TRIANGLES, 0, 36);
+            glm::mat4 model;
+            model = glm::translate(model, cubePositions[i]);
+            model = glm::rotate(model, (float)glfwGetTime()*(i+1), glm::vec3(1.0f, 0.3f, 0.5f));
+            ourShader.setMat4("model", model);
+            
+            glDrawArrays(GL_TRIANGLES, 0, 36);
         }
         
         glfwSwapBuffers(window);
@@ -238,6 +243,16 @@ void processInput(GLFWwindow *window){
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS){
         glfwSetWindowShouldClose(window, true);
     }
+    
+    float cameraSpeed = 0.05f; // adjust accordingly 响应速度
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        cameraPos += cameraSpeed * cameraFront;
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        cameraPos -= cameraSpeed * cameraFront;
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 }
 
 /**
