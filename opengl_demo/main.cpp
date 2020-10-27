@@ -17,13 +17,26 @@
 const unsigned int SCR_WIDTH = 1000;
 const unsigned int SCR_HEIGHT = 650;
 
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f); // 摄像机在世界空间中的位置向量
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f); // 摄像机方向向量/指向摄像机空间正z轴的反方向
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f); // 世界空间中上向量（用于计算摄像机空间右轴/x轴）
+
+float deltaTime = 0.0f; // 渲染这一帧和上一帧时间差
+float lastFrame = 0.0f; // 渲染上一帧时间点
+float lastX = 500.0f; // 鼠标上一帧所在x坐标 右正
+float lastY = 325.0f; // 鼠标上一帧所在y坐标 openGL中 下正，与屏幕相反
+bool firstMouse = true;
+float fov = 45.0f; // 视野缩放级别 Zoom Level
+
+float yaw = -90.0f;
+float pitch = 0.0f;
+
 void processInput(GLFWwindow* window);
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void toNDC(float* vertices, int length, int SCR_WIDTH, int SCR_HEIGHT);
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
-glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f); // 摄像机位置向量
-glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f); // 摄像机方向，摄像机正z轴
-glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f); // 世界空间中上轴正方向
 
 int main(){
     // GLFW window
@@ -177,40 +190,45 @@ int main(){
     ourShader.setInt("texture1", 0);
     ourShader.setInt("texture2", 1);
     
-
+    // 设置鼠标输入模式，把光标留在GLFW窗口内
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    // 注册鼠标移动事件的回调
+    glfwSetCursorPosCallback(window, mouse_callback);
+    // 注册鼠标滚轮事件的回调
+    glfwSetScrollCallback(window, scroll_callback);
     
     // 循环渲染
     while(!glfwWindowShouldClose(window)){
+        // 1. 处理输入事件
         processInput(window);
         
+        // 2. 调整glfw窗口背景
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
+        // 3. 更新 deltaTime
+        float currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
+        
+        // 3. 使用纹理
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture1);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, texture2);
         
+        // 4. 使用着色器
         ourShader.use();
         
-        // 定义圆轨半径
-        //        float radius = 10.0f;
-        // 摄像机位置x坐标
-        //        float cameraX = sin(glfwGetTime()) * radius;
-        // 摄像机位置y坐标
-        //        float cameraZ = cos(glfwGetTime()) * radius;
-        
-
-        
-        // 定义三种变换矩阵：模型矩阵modelMatrix，观察矩阵viewMatrix，投影矩阵projectionMatrix
+        // 5. 变换
         glm::mat4 view;
         glm::mat4 projection;
         
-        projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-        //        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f)); // 单位矩阵 + 位移向量 = 位移矩阵
-        view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-        
+//        projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+        projection = glm::perspective(glm::radians(fov), 500.0f / 325.0f, 0.1f, 100.0f);
         ourShader.setMat4("projection", projection);
+        
+        view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
         ourShader.setMat4("view", view);
         
         glBindVertexArray(VAO);
@@ -244,7 +262,7 @@ void processInput(GLFWwindow *window){
         glfwSetWindowShouldClose(window, true);
     }
     
-    float cameraSpeed = 0.05f; // adjust accordingly 响应速度
+    float cameraSpeed = 2.5 * deltaTime; // adjust accordingly 响应速度
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         cameraPos += cameraSpeed * cameraFront;
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
@@ -263,10 +281,57 @@ void toNDC(float* vertices, int size, int SCR_WIDTH, int SCR_HEIGHT){
     float halfSCR_WIDTH = SCR_WIDTH / 2.0;
     float halfSCR_HEIGHT = SCR_HEIGHT / 2.0;
     for(int i = 0; i < verticesNum; i += 3){
-        //        std::cout << "from " <<vertices[i] << "  " << vertices[i+1] << "  " << vertices[i+2] << std::endl;
         vertices[i] = float(vertices[i] / halfSCR_WIDTH); // x
         vertices[i+1] = float(vertices[i+1] / halfSCR_HEIGHT); // y
         vertices[i+2] = 0.0f; // z
-        //        std::cout << "to " << vertices[i] << "  " << vertices[i+1] << "  " << vertices[i+2] << std::endl;
     }
+}
+
+/**
+ 鼠标移动事件
+ */
+void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
+    if(firstMouse) {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+    
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos;
+    lastX = xpos;
+    lastY = ypos;
+    
+    float sensitivity = 0.1f; // 灵敏度
+    xoffset = xoffset * sensitivity;
+    yoffset = yoffset * sensitivity;
+    
+    // 更新 偏航角yaw 和 俯仰角pitch
+    yaw = yaw + xoffset;
+    pitch = pitch + yoffset;
+    
+    // 对俯仰角做限制
+    if(pitch > 89.0f)
+        pitch = 89.0f;
+    if(pitch < -89.0f)
+        pitch = -89.0f;
+    
+    // 实时更新方向向量，以在循环渲染中生成观察矩阵
+    glm::vec3 front;
+    front.x = cos(glm::radians(pitch)) * cos(glm::radians(yaw));
+    front.y = sin(glm::radians(pitch));
+    front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    cameraFront = glm::normalize(front);
+}
+
+/**
+ 鼠标滚轮事件
+ */
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset){
+    if(fov >= 1.0f && fov <= 45.0f)
+        fov = fov - yoffset;
+    if(fov <= 1.0f)
+        fov = 1.0f;
+    if(fov >= 45.0f)
+        fov = 45.0f;
 }
