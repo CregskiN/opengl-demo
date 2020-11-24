@@ -20,6 +20,8 @@ const unsigned int SCR_HEIGHT = 650;
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f); // 摄像机在世界空间中的位置向量
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f); // 摄像机方向向量/指向摄像机空间正z轴的反方向
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f); // 世界空间中上向量（用于计算摄像机空间右轴/x轴）
+float cameraPosHeight = 3.0f;
+glm::vec3 cameraPosStart = glm::vec3(0.0f, 0.0f, 3.0f);
 
 float deltaTime = 0.0f; // 渲染这一帧和上一帧时间差
 float lastFrame = 0.0f; // 渲染上一帧时间点
@@ -115,6 +117,13 @@ int main(){
     
     glm::vec3 cubePositions[] = {
         glm::vec3( 0.0f,  0.0f,  0.0f),
+//        glm::vec3( 0.0f,  0.0f,  0.0f),
+//        glm::vec3( 0.0f,  0.0f,  0.0f),
+//        glm::vec3( 0.0f,  0.0f,  0.0f),
+//        glm::vec3( 0.0f,  0.0f,  0.0f),
+//        glm::vec3( 0.0f,  0.0f,  0.0f),
+//        glm::vec3( 0.0f,  0.0f,  0.0f),
+//        glm::vec3( 0.0f,  0.0f,  0.0f),
         glm::vec3( 2.0f,  5.0f, -15.0f),
         glm::vec3(-1.5f, -2.2f, -2.5f),
         glm::vec3(-3.8f, -2.0f, -12.3f),
@@ -235,7 +244,8 @@ int main(){
         for(unsigned int i = 0; i < 10; i++) {
             glm::mat4 model;
             model = glm::translate(model, cubePositions[i]);
-            model = glm::rotate(model, (float)glfwGetTime()*(i+1), glm::vec3(1.0f, 0.3f, 0.5f));
+            model = glm::rotate(model, (float)sin(glfwGetTime()) * 2 * (i+1), glm::vec3(1.0f, 0.3f, 0.5f));
+//            model = glm::rotate(model, (float)0, glm::vec3(1.0f, 0.3f, 0.5f));
             ourShader.setMat4("model", model);
             
             glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -269,22 +279,17 @@ void processInput(GLFWwindow *window){
         cameraPos -= cameraSpeed * cameraFront;
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
         cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) // 水平右移
         cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-}
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+        cameraPos += cameraSpeed * cameraUp; // 垂直起飞
+    if(glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS)
+        cameraPos -= cameraSpeed * cameraUp; // 垂直下落
+    if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
+        cameraPos = glm::vec3(0.0f, 0.0f, cameraPosHeight); // 闪现到初始位置
+    if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS)
+        cameraPos = glm::vec3(cameraPos.x, 0.0f, cameraPos.z); // 闪现到平地
 
-/**
- 按标准坐标 等比缩小
- */
-void toNDC(float* vertices, int size, int SCR_WIDTH, int SCR_HEIGHT){
-    int verticesNum = size / 4; // 顶点总数
-    float halfSCR_WIDTH = SCR_WIDTH / 2.0;
-    float halfSCR_HEIGHT = SCR_HEIGHT / 2.0;
-    for(int i = 0; i < verticesNum; i += 3){
-        vertices[i] = float(vertices[i] / halfSCR_WIDTH); // x
-        vertices[i+1] = float(vertices[i+1] / halfSCR_HEIGHT); // y
-        vertices[i+2] = 0.0f; // z
-    }
 }
 
 /**
